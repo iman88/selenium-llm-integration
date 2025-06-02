@@ -111,6 +111,6 @@ Ollama for providing the AI models.
 Selenium for browser automation capabilities.
 
 **Connect with Me**
-
+Original code from: https://github.com/SACTAN/AI-powered-locator-generation
 If you have any questions or suggestions, feel free to reach out:
 Email: sachinbhute23nov@gmail.com
