@@ -145,3 +145,11 @@ The `TestListener` registered in `testng.xml` calls the AI on any test failure t
 ## Acknowledgements
 
 Original concept: [SACTAN/AI-powered-locator-generation](https://github.com/SACTAN/AI-powered-locator-generation)
+
+---
+
+## License
+
+Copyright (c) 2025 Ionut Man
+
+Free to use, modify, and distribute for any purpose — personal, educational, or commercial — without restriction. No warranty is provided.
