@@ -1,116 +1,147 @@
-# **Self-Healing selenium Automation locators with AI Integration** 🚀
+# Self-Healing Selenium Locators with AI Integration
 
-**Overview**
+Extended from [SACTAN/AI-powered-locator-generation](https://github.com/SACTAN/AI-powered-locator-generation) — credits to the original concept.
 
-This project is a Self-Healing locator demo designed to enhance the robustness of Selenium-based test automation. It leverages AI-powered locator generation using Ollama to dynamically adapt to UI changes, 
-reducing maintenance overhead and improving test stability.
+---
 
-**Key Features**
+## What was extended
 
-Self-Healing Mechanism: Automatically recovers from failed locators (e.g., NoSuchElementException) by generating alternative XPath selectors.
-AI-Powered Locator Generation: Uses Ollama and the qwen2.5-coder:3b model to suggest valid locators for failed elements.
-Timeout Handling: Ensures AI requests terminate gracefully if they take too long.
-Maven Integration: Easy dependency management and build configuration.
-Extensible Design: Can be integrated into existing Selenium frameworks.
+The original repo demonstrated the core idea of using Ollama to heal a broken locator against a local HTML file. This project builds on that foundation with the following additions:
 
-**Tech Stack**
+- **Real-world test target** — switched from a local HTML file to [example.cypress.io/commands/querying](https://example.cypress.io/commands/querying), a stable public page used in Cypress documentation that rarely changes
+- **TestNG test framework** — replaced the `main()` approach with a proper TestNG suite with `@BeforeMethod` / `@AfterMethod` lifecycle and priorities
+- **AI-friendly locators** — locators are authored with multiple attributes so the AI has richer context to heal against: `By.xpath("//input[@id='inputName' and @placeholder='Name' and @type='text']")`
+- **Extended healing prompt** — the prompt now instructs the model to validate each attribute individually and fix only the ones that are no longer valid
+- **OpenAI GPT-4o backend** — added a second healing path via the OpenAI API (`com.gbt`), which is significantly more reliable than a local Ollama model
+- **Region-scoped HTML** — instead of sending the full page source, each test extracts only the relevant region's `innerHTML` via JavaScript and sends that to the AI. 27 calls cost ~3 cents
 
-Java: Core programming language.
-Selenium WebDriver: Browser automation.
-Ollama: AI for generating alternative locators.
-Apache HttpClient: For making API calls to Ollama.
-Gson: JSON parsing for AI responses.
-Maven: Build and dependency management.
+---
 
-**Prerequisites**
+## Architecture
 
-Before running the project, ensure you have the following installed:
-Java JDK 17 or higher.
-Maven (for dependency management).
-Ollama (installed and running locally).
-Install Ollama: Ollama Installation Guide.
-Pull the required model:
-bash ollama pull qwen2.5-coder:3b
-ChromeDriver (or any other WebDriver compatible with your browser).
+```
+Test (HealingPageRegion1 / HealingPageRegion2)
+         │
+         │  findElementWithHealing(By locator, String regionHTML)
+         │
+    ┌────┴─────────────────────────────┐
+    │                                  │
+    ▼                                  ▼
+SelfHealingOllamaClient         SelfHealingGbtClient
+  (org.apicodes)                   (com.gbt)
+    │                                  │
+    ▼                                  ▼
+OllamaClient                   ChatGPTLocatorFixer
+localhost:11434                 api.openai.com/v1
+qwen2.5-coder:3b                gpt-4o
+```
 
-**Setup Instructions**
+Both paths share the same interface: receive the original `By` locator and the region's HTML, try the original locator, and if it fails ask the AI to produce a corrected XPath.
 
-1. Clone the Repository
-git clone https://github.com/your-username/self-healing-automation-framework.git
-cd self-healing-automation-framework
+---
 
-2. Enable Safari for automation using `safaridriver --enable`
+## Tech stack
 
-3. Check ollama connectivity using `ollama run qwen2.5-coder:3b`
+| Layer | Technology |
+|---|---|
+| Language | Java 21 |
+| Browser automation | Selenium WebDriver 4.20 |
+| Driver management | WebDriverManager 6 (SeleniumManager fallback) |
+| Test framework | TestNG 7.10 |
+| Local AI | Ollama + qwen2.5-coder:3b |
+| Cloud AI | OpenAI GPT-4o via REST |
+| HTTP client (Ollama) | Apache HttpClient 4.5 |
+| HTTP client (OpenAI) | OkHttp 4.12 |
+| JSON | Gson 2.11 |
+| Build | Maven 3 |
 
-4. Configure Ollama
-Ensure the Ollama server is running using `ollama serve`
+---
 
-If not running start it using `ollama run qwen2.5-coder:3b`
+## Prerequisites
 
-4. Update Configuration
-Modify the OllamaClient class to use the correct model and API endpoint (if needed).
+- Java 21+
+- Maven 3.6+
+- Chrome (WebDriverManager handles the driver automatically)
+- **For Ollama backend**: [Ollama](https://ollama.com) running locally with the model pulled:
+  ```
+  ollama pull qwen2.5-coder:3b
+  ollama serve
+  ```
+- **For OpenAI backend**: an OpenAI API key set as an environment variable:
+  ```
+  export OPENAI_API_KEY=sk-...
+  ```
+  On Windows: `$env:OPENAI_API_KEY = "sk-..."`
 
-3. Build the Project using `mvn clean install`
+---
 
-**Usage**
+## Setup
 
-Example: Self-Healing Test
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
+```bash
+git clone https://github.com/Bernard-Lowe/selenium-llm-integration
+cd selenium-llm-integration
+mvn clean install -DskipTests
+```
 
-public class LoginTest {
+---
 
-    static SelfHealingDriver healingDriver;
-    public static void main(String[] args) throws Exception {
-        // Set up WebDriver
-        WebDriver driver = new ChromeDriver();
-        healingDriver = new SelfHealingDriver(driver);
+## Running the tests
 
-        // Navigate to the login page
-        String  dir = System.getProperty("user.dir");
-        System.out.println("file path "+ dir +  "/src/sample.html");
-        driver.get(dir + "/src/sample.html");
+```bash
+# Full suite (both Ollama and OpenAI backends)
+mvn test
 
-        // Original locator that might fail
-        String usernameLocator = "//input[@id='email']";
+# Ollama backend only
+mvn test -Dtest="org.apicodes.HealingPageRegion1,org.apicodes.HealingPageRegion2"
 
-        // Self-healing element finding
-        WebElement emailField = healingDriver.findElementWithHealing("//input[@id='email']");
-        emailField.sendKeys("user@example.com");
+# OpenAI backend only
+mvn test -Dtest="com.gbt.HealingPageRegion1,com.gbt.HealingPageRegion2"
+```
 
-        // Close the browser
-        driver.quit();
-    }
-}
+The suite runs against `https://example.cypress.io/commands/querying`.
 
-**How It Works**
+---
 
-If the original locator fails, the framework captures the HTML snippet and error details.
-It sends a request to Ollama to generate alternative locators.
-The framework retries the test with the new locators until it succeeds or exhausts all options.
+## How the healing works
 
-**Customization**
+1. `findElementWithHealing(By, regionHTML)` tries the original locator with a 1-second wait
+2. On failure, it extracts a prompt: region HTML + broken locator → AI is asked to return one corrected XPath
+3. The corrected locator is parsed from the AI response and retried
+4. If the second attempt also fails, `NoSuchElementException` is thrown — no silent swallowing
 
-1. Adjust Timeout
-Modify the TIMEOUT value in the OllamaClient class to control how long the framework waits for AI responses:
+The `TestListener` registered in `testng.xml` calls the AI on any test failure to produce a bullet-point analysis of what went wrong.
 
-java
-private static final int TIMEOUT = 150000; // Timeout in milliseconds
+---
 
-3. Add More Models
-You can use other Ollama models (e.g., llama2, mistral) by updating the model parameter in the generateText method.
+## Test coverage
 
-4. Extend Functionality
-Add support for multimodal AI (e.g., combining visual and DOM analysis).
+**Region 1** — `cy.get()` button area
 
+| Test | Locator scenario |
+|---|---|
+| `validLocator` | Correct ID and text — should pass without healing |
+| `goodTextAndBadIdLocator` | Wrong ID, correct text — AI must fix the ID |
+| `badTextAndBadIdLocator` | Wrong ID and wrong text — AI must fix both |
 
-**Acknowledgments**
+**Region 2** — `.within()` input area
 
-Ollama for providing the AI models.
-Selenium for browser automation capabilities.
+| Test | Locator scenario |
+|---|---|
+| `validLocator` | All attributes correct |
+| `invalidId` | Wrong `@id` |
+| `invalidPlaceholder` | Wrong `@placeholder` |
+| `invalidType` | Wrong `@type` |
 
-**Connect with Me**
-Original code from: https://github.com/SACTAN/AI-powered-locator-generation
-If you have any questions or suggestions, feel free to reach out:
-Email: sachinbhute23nov@gmail.com
+---
+
+## Roadmap
+
+- [ ] Persist healed locators to a JSON file so the locator store self-updates after a successful heal
+- [ ] Bash/CI script to auto-raise a PR when tests pass with healed locators
+- [ ] Plug this healing layer into a full-stack Java framework (TestNG + Cucumber, Selenium + Playwright, API, JDBC)
+
+---
+
+## Acknowledgements
+
+Original concept: [SACTAN/AI-powered-locator-generation](https://github.com/SACTAN/AI-powered-locator-generation)

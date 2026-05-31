@@ -11,8 +11,9 @@ import java.io.IOException;
 public class ChatGPTLocatorFixer {
 
     private static final String API_URL = "https://api.openai.com/v1/chat/completions";
-    //    private static final String API_KEY = "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";
-    private static final String API_KEY = "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";
+    private static final String API_KEY = System.getenv("OPENAI_API_KEY") != null
+            ? System.getenv("OPENAI_API_KEY")
+            : System.getProperty("openai.api.key", "");
     private static final OkHttpClient client = new OkHttpClient();
 
     public static String constructGbtPayload(String regionHTML, String originalLocator){

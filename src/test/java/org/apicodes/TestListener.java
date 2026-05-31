@@ -3,21 +3,19 @@ package org.apicodes;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
 
-import static org.apicodes.SelfHealingOllamaClient.getOllama;
-
 public class TestListener implements ITestListener {
+
+    private final OllamaClient ollama = new OllamaClient();
+
     @Override
     public void onTestFailure(ITestResult result) {
         String errorLog = result.getThrowable().getMessage();
-        String analysisPrompt = "Analyze this Selenium test failure: " + errorLog +
+        String prompt = "Analyze this Selenium test failure: " + errorLog +
                 ". Suggest possible fixes in bullet points.";
-
-        String aiAnalysis = null;
         try {
-            aiAnalysis = getOllama().generateText("qwen2.5-coder:3b", analysisPrompt);
+            System.out.println("AI Failure Analysis:\n" + ollama.generateText("qwen2.5-coder:3b", prompt));
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            System.out.println("AI analysis unavailable: " + e.getMessage());
         }
-        System.out.println("AI Failure Analysis:\n" + aiAnalysis);
     }
 }
