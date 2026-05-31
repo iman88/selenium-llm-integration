@@ -150,6 +150,4 @@ Original concept: [SACTAN/AI-powered-locator-generation](https://github.com/SACT
 
 ## License
 
-Copyright (c) 2025 Ionut Man
-
-Free to use, modify, and distribute for any purpose — personal, educational, or commercial — without restriction. No warranty is provided.
+This repository is distributed under the [MIT License](https://opensource.org/licenses/MIT) — you are free to use, copy, modify, and distribute this code, provided you retain credit to the original authors.
