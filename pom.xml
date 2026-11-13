@@ -14,24 +14,17 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
-    <junit.version>3.8.1</junit.version>
     <httpclient.version>4.5.14</httpclient.version>
-    <webdrivermanager.version>6.0.0</webdrivermanager.version>
-    <testng.version>7.10.2</testng.version>
-    <gson.version>2.11.0</gson.version>
-    <selenium-java.version>4.20.0</selenium-java.version>
-    <okhttp.version>4.12.0</okhttp.version>
+    <webdrivermanager.version>6.4.0</webdrivermanager.version>
+    <testng.version>7.12.0</testng.version>
+    <gson.version>2.15.0</gson.version>
+    <selenium-java.version>4.52.0</selenium-java.version>
+    <okhttp.version>4.12.1</okhttp.version>
     <wiremock.version>3.13.2</wiremock.version>
-    <surefire.version>3.2.5</surefire.version>
+    <surefire.version>3.5.6</surefire.version>
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>${junit.version}</version>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
@@ -75,7 +68,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.13.0</version>
+        <version>3.16.0</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

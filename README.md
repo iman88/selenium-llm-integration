@@ -45,15 +45,15 @@ Both paths share the same interface: receive the original `By` locator and the r
 | Layer | Technology |
 |---|---|
 | Language | Java 21 |
-| Browser automation | Selenium WebDriver 4.20 |
-| Driver management | WebDriverManager 6 (SeleniumManager fallback) |
-| Test framework | TestNG 7.10 |
+| Browser automation | Selenium WebDriver 4.52 |
+| Driver management | WebDriverManager 6.4 (SeleniumManager fallback) |
+| Test framework | TestNG 7.12 |
 | AI mock (tests) | WireMock 3.13.2 |
 | Local AI | Ollama + qwen2.5-coder:3b |
 | Cloud AI | OpenAI GPT-4o via REST |
 | HTTP client (Ollama) | Apache HttpClient 4.5 |
-| HTTP client (OpenAI) | OkHttp 4.12 |
-| JSON | Gson 2.11 |
+| HTTP client (OpenAI) | OkHttp 4.12.1 |
+| JSON | Gson 2.15 |
 | Build | Maven 3 |
 
 ---
@@ -178,6 +178,24 @@ When a test fails, `TestListener` asks the AI (Ollama, qwen2.5-coder:3b) to expl
 - [ ] Plug this healing layer into a full-stack Java framework (TestNG + Cucumber, Selenium + Playwright, API, JDBC)
 
 ---
+
+## 🔄 Maintenance & planned updates
+
+> Versions in `pom.xml` are pinned, so nothing changes by itself, but pinned versions age. The table says when
+> each component needs a look. Checked on 2026-11-13. To run the maintenance, ask Claude to "run maintenance"
+> (the `maintain` skill).
+
+| Component | Current version | End of life / event | Action needed | Urgency |
+|---|---|---|---|---|
+| Java | 21 LTS (local 21.0.11) | Supported until Dec 2029 | None for now. Java 25 LTS is the next move | ✅ |
+| Selenium | 4.52.0 | Released about monthly | Move up every 3 months; check the healing tests still find the page | Within 3 months |
+| TestNG / maven-surefire-plugin | 7.12.0 / 3.5.6 | — | Stay on surefire 3.5.x: 3.6.x drops `suiteXmlFiles`, and the suite runs from `testng.xml` | ✅ |
+| WebDriverManager | 6.4.0 | — | Selenium Manager already finds drivers; check whether it is still needed, and drop it if not | Plan |
+| OkHttp (OpenAI client) | 4.12.1 (last 4.x) | — | 5.5.1 is out (major): move after reading its migration notes | Plan |
+| Apache HttpClient (Ollama client) | 4.5.14 (last 4.x) | 4.x gets no new features | Move to HttpClient 5 (5.6.5), or to Java's own `java.net.http.HttpClient` and drop the dependency | Plan |
+| Gson / WireMock / compiler plugin | 2.15.0 / 3.13.2 / 3.16.0 | WireMock 4 is still beta | None | ✅ |
+| AI models | OpenAI `gpt-4o`, Ollama `qwen2.5-coder:3b` | Models get retired and replaced | Check both still exist; try a newer one with `-Dai=live` before switching. The mock stubs name the model, so update them too | Every 3 months |
+| example.cypress.io page | Live test target | Can change without notice | If the healing tests fail with the mock on, check the page first | When a run fails |
 
 ## Acknowledgements
 
