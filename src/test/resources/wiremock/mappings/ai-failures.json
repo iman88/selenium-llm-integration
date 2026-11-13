@@ -1,0 +1,52 @@
+{
+  "mappings": [
+    {
+      "name": "OpenAI answers with prose instead of an XPath",
+      "request": {
+        "method": "POST",
+        "url": "/v1/chat/completions",
+        "bodyPatterns": [ { "matchesJsonPath": { "expression": "$.messages[1].content", "contains": "@id='ai-answers-with-prose'" } } ]
+      },
+      "response": {
+        "status": 200,
+        "jsonBody": { "choices": [ { "index": 0, "message": { "role": "assistant", "content": "Sorry, I could not find that element in the HTML." } } ] }
+      }
+    },
+    {
+      "name": "OpenAI answers with an XPath in a fenced xpath block",
+      "request": {
+        "method": "POST",
+        "url": "/v1/chat/completions",
+        "bodyPatterns": [ { "matchesJsonPath": { "expression": "$.messages[1].content", "contains": "@id='ai-answers-fenced'" } } ]
+      },
+      "response": {
+        "status": 200,
+        "jsonBody": { "choices": [ { "index": 0, "message": { "role": "assistant", "content": "```xpath\n//*[@id='query-btn']\n```" } } ] }
+      }
+    },
+    {
+      "name": "OpenAI rate limit",
+      "request": {
+        "method": "POST",
+        "url": "/v1/chat/completions",
+        "bodyPatterns": [ { "matchesJsonPath": { "expression": "$.messages[1].content", "contains": "@id='ai-rate-limited'" } } ]
+      },
+      "response": {
+        "status": 429,
+        "jsonBody": { "error": { "message": "Rate limit reached for gpt-4o", "type": "rate_limit_exceeded" } }
+      }
+    },
+    {
+      "name": "Ollama answers with prose instead of an XPath",
+      "request": {
+        "method": "POST",
+        "url": "/api/generate",
+        "bodyPatterns": [ { "matchesJsonPath": { "expression": "$.prompt", "contains": "@id='ai-answers-with-prose'" } } ]
+      },
+      "response": {
+        "status": 200,
+        "jsonBody": { "model": "qwen2.5-coder:3b", "done": true, "response": "Sorry, I could not find that element in the HTML." }
+      }
+    }
+  ]
+}

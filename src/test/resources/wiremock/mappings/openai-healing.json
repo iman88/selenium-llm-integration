@@ -1,0 +1,84 @@
+{
+  "mappings": [
+    {
+      "name": "OpenAI heals region 1: bad id, good text",
+      "request": {
+        "method": "POST",
+        "url": "/v1/chat/completions",
+        "bodyPatterns": [
+          { "matchesJsonPath": { "expression": "$.model", "equalTo": "gpt-4o" } },
+          { "matchesJsonPath": { "expression": "$.messages[1].content", "contains": "//*[@id='query-btnn' and contains(text(), 'Button')]" } },
+          { "matchesJsonPath": { "expression": "$.messages[1].content", "contains": "id=\"query-btn\"" } }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "jsonBody": { "choices": [ { "index": 0, "message": { "role": "assistant", "content": "//*[@id='query-btn' and contains(text(), 'Button')]" } } ] }
+      }
+    },
+    {
+      "name": "OpenAI heals region 1: bad id, bad text",
+      "request": {
+        "method": "POST",
+        "url": "/v1/chat/completions",
+        "bodyPatterns": [
+          { "matchesJsonPath": { "expression": "$.model", "equalTo": "gpt-4o" } },
+          { "matchesJsonPath": { "expression": "$.messages[1].content", "contains": "//*[@id='query-btnn' and contains(text(), 'Button new')]" } },
+          { "matchesJsonPath": { "expression": "$.messages[1].content", "contains": "id=\"query-btn\"" } }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "jsonBody": { "choices": [ { "index": 0, "message": { "role": "assistant", "content": "//*[@id='query-btn' and contains(text(), 'Button')]" } } ] }
+      }
+    },
+    {
+      "name": "OpenAI heals region 2: bad id",
+      "request": {
+        "method": "POST",
+        "url": "/v1/chat/completions",
+        "bodyPatterns": [
+          { "matchesJsonPath": { "expression": "$.model", "equalTo": "gpt-4o" } },
+          { "matchesJsonPath": { "expression": "$.messages[1].content", "contains": "//input[@id='adsad' and @placeholder='Name' and @type='text']" } },
+          { "matchesJsonPath": { "expression": "$.messages[1].content", "contains": "id=\"inputName\"" } }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "jsonBody": { "choices": [ { "index": 0, "message": { "role": "assistant", "content": "//input[@id='inputName' and @placeholder='Name' and @type='text']" } } ] }
+      }
+    },
+    {
+      "name": "OpenAI heals region 2: bad placeholder",
+      "request": {
+        "method": "POST",
+        "url": "/v1/chat/completions",
+        "bodyPatterns": [
+          { "matchesJsonPath": { "expression": "$.model", "equalTo": "gpt-4o" } },
+          { "matchesJsonPath": { "expression": "$.messages[1].content", "contains": "//input[@id='inputName' and @placeholder='User Name' and @type='text']" } },
+          { "matchesJsonPath": { "expression": "$.messages[1].content", "contains": "id=\"inputName\"" } }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "jsonBody": { "choices": [ { "index": 0, "message": { "role": "assistant", "content": "//input[@id='inputName' and @placeholder='Name' and @type='text']" } } ] }
+      }
+    },
+    {
+      "name": "OpenAI heals region 2: bad type",
+      "request": {
+        "method": "POST",
+        "url": "/v1/chat/completions",
+        "bodyPatterns": [
+          { "matchesJsonPath": { "expression": "$.model", "equalTo": "gpt-4o" } },
+          { "matchesJsonPath": { "expression": "$.messages[1].content", "contains": "//input[@id='inputName' and @placeholder='Name' and @type='password']" } },
+          { "matchesJsonPath": { "expression": "$.messages[1].content", "contains": "id=\"inputName\"" } }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "jsonBody": { "choices": [ { "index": 0, "message": { "role": "assistant", "content": "//input[@id='inputName' and @placeholder='Name' and @type='text']" } } ] }
+      }
+    }
+  ]
+}
