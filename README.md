@@ -93,7 +93,7 @@ By default the **AI calls are mocked**: `mvn test` needs no Ollama and no API ke
 same answer every run. The web page stays live.
 
 ```bash
-# Full suite, AI mocked (default): 19 tests
+# Full suite, AI mocked (default): 21 tests
 mvn test
 
 # Full suite against the real models (Ollama running + OPENAI_API_KEY set)
@@ -129,7 +129,7 @@ The suite runs against `https://example.cypress.io/commands/querying`.
 3. The corrected locator is parsed from the AI response and retried
 4. If the second attempt also fails, `NoSuchElementException` is thrown — no silent swallowing
 
-The `TestListener` (not registered in `testng.xml` at the moment) calls the AI on any test failure to produce a bullet-point analysis of what went wrong.
+When a test fails, `TestListener` asks the AI (Ollama, qwen2.5-coder:3b) to explain the failure and suggest fixes. The answer is printed and added to the TestNG report (`target/surefire-reports/emailable-report.html`) under the failed test. With the AI mock it is a canned answer, labelled as such; with `-Dai=live` it is the real model. If the AI can't answer, a short note says so, and the analysis never changes a test's result.
 
 ---
 
@@ -161,6 +161,13 @@ The `TestListener` (not registered in `testng.xml` at the moment) calls the AI o
 | `openAiRateLimitIsReportedNotSwallowed` | OpenAI returns 429: the error says so |
 | `ollamaAnswerThatIsNotAnXPathIsRejected` | Ollama answers with prose: rejected with a clear error |
 | `ollamaNotRunningFailsTheCall` | Ollama is not running: the call fails |
+
+**AI failure analysis** — `aimock.FailureAnalysisTest`, mock only, no browser
+
+| Test | Scenario |
+|---|---|
+| `failureIsExplainedByTheAi` | A failed test's error goes to the AI, and its answer comes back as the analysis |
+| `aiDownGivesANoteInsteadOfBreakingTheRun` | Ollama is not running: a short "AI analysis unavailable" note instead of an error |
 
 ---
 

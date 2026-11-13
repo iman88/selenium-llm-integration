@@ -1,0 +1,24 @@
+{
+  "mappings": [
+    {
+      "name": "Ollama explains a failed test (used by TestListener)",
+      "request": {
+        "method": "POST",
+        "url": "/api/generate",
+        "bodyPatterns": [
+          { "matchesJsonPath": { "expression": "$.model", "equalTo": "qwen2.5-coder:3b" } },
+          { "matchesJsonPath": { "expression": "$.prompt", "contains": "Analyze this Selenium test failure: " } },
+          { "matchesJsonPath": { "expression": "$.prompt", "contains": "Suggest possible fixes in bullet points." } }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "jsonBody": {
+          "model": "qwen2.5-coder:3b",
+          "done": true,
+          "response": "- Check that the locator in the error still matches the page.\n- Compare it with the region HTML the healing used.\n- If the page changed, update the locator or let self-healing fix it."
+        }
+      }
+    }
+  ]
+}

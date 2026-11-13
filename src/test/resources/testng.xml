@@ -8,6 +8,7 @@
             <class name="com.gbt.HealingPageRegion1" />
             <class name="com.gbt.HealingPageRegion2" />
             <class name="aimock.AiFailureTest" />
+            <class name="aimock.FailureAnalysisTest" />
         </classes>
     </test>
 </suite>
